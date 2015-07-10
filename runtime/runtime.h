@@ -548,6 +548,8 @@ class Runtime {
     return method_ref_string_init_reg_map_;
   }
 
+  bool IsDebuggable() const;
+
   // Returns the build fingerprint, if set. Otherwise an empty string is returned.
   std::string GetFingerprint() {
     return fingerprint_;
