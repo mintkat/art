@@ -2017,7 +2017,7 @@ void Thread::DumpFromGdb() const {
   std::string str(ss.str());
   // log to stderr for debugging command line processes
   std::cerr << str;
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
   // log to logcat for debugging frameworks processes
   LOG(INFO) << str;
 #endif

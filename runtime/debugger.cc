@@ -53,7 +53,7 @@
 #include "verifier/method_verifier-inl.h"
 #include "well_known_classes.h"
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
 #include "cutils/properties.h"
 #endif
 
@@ -4773,7 +4773,7 @@ void Dbg::DdmSendHeapSegments(bool native) {
   // Send a series of heap segment chunks.
   HeapChunkContext context(what == HPSG_WHAT_MERGED_OBJECTS, native);
   if (native) {
-#if defined(HAVE_ANDROID_OS) && defined(USE_DLMALLOC)
+#if defined(__ANDROID__) && defined(USE_DLMALLOC)
     dlmalloc_inspect_all(HeapChunkContext::HeapChunkNativeCallback, &context);
     HeapChunkContext::HeapChunkNativeCallback(nullptr, nullptr, 0, &context);  // Indicate end of a space.
 #else
@@ -4834,7 +4834,7 @@ void Dbg::DdmSendHeapSegments(bool native) {
 }
 
 static size_t GetAllocTrackerMax() {
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
   // Check whether there's a system property overriding the number of records.
   const char* propertyName = "dalvik.vm.allocTrackerMax";
   char allocRecordMaxString[PROPERTY_VALUE_MAX];
