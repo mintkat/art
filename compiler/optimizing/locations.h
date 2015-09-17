@@ -69,7 +69,7 @@ class Location : public ValueObject {
     kUnallocated = 10,
   };
 
-  Location() : value_(kInvalid) {
+  Location() : ValueObject(), value_(kInvalid) {
     // Verify that non-constant location kinds do not interfere with kConstant.
     static_assert((kInvalid & kLocationConstantMask) != kConstant, "TagError");
     static_assert((kUnallocated & kLocationConstantMask) != kConstant, "TagError");
