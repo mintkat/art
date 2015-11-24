@@ -320,7 +320,8 @@ ifeq ($(ART_BUILD_TARGET_NDEBUG),true)
 endif
 ifeq ($(ART_BUILD_TARGET_DEBUG),true)
   ART_BUILD_TARGET := true
-  ART_BUILD_DEBUG := true
+  ART_BUILD_DEBUG := false
+  ART_BUILD_NDEBUG := true
 endif
 ifeq ($(ART_BUILD_HOST_NDEBUG),true)
   ART_BUILD_HOST := true
@@ -328,7 +329,8 @@ ifeq ($(ART_BUILD_HOST_NDEBUG),true)
 endif
 ifeq ($(ART_BUILD_HOST_DEBUG),true)
   ART_BUILD_HOST := true
-  ART_BUILD_DEBUG := true
+  ART_BUILD_DEBUG := false
+  ART_BUILD_NDBUG := true
 endif
 
 endif # ART_ANDROID_COMMON_BUILD_MK
