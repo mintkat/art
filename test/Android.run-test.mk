@@ -230,8 +230,10 @@ endif
 
 TEST_ART_BROKEN_PREBUILD_RUN_TESTS :=
 
+# 554-jit-profile-file is disabled because it needs a primary oat file to know what it should save.
 TEST_ART_BROKEN_NO_PREBUILD_TESTS := \
-  117-nopatchoat
+  117-nopatchoat \
+  554-jit-profile-file
 
 ifneq (,$(filter no-prebuild,$(PREBUILD_TYPES)))
   ART_TEST_KNOWN_BROKEN += $(call all-run-test-names,$(TARGET_TYPES),$(RUN_TYPES),no-prebuild, \
