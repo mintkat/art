@@ -1,4 +1,4 @@
-#
+##
 # Copyright (C) 2011 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,19 +20,13 @@ ART_ANDROID_COMMON_BUILD_MK = true
 include art/build/Android.common.mk
 include art/build/Android.common_utils.mk
 
-# These can be overridden via the environment or by editing to
-# enable/disable certain build configuration.
 #
-# For example, to disable everything but the host debug build you use:
+# Only non-debug targets are used to improve performance.
 #
-# (export ART_BUILD_TARGET_NDEBUG=false && export ART_BUILD_TARGET_DEBUG=false && export ART_BUILD_HOST_NDEBUG=false && ...)
-#
-# Beware that tests may use the non-debug build for performance, notable 055-enum-performance
-#
-ART_BUILD_TARGET_NDEBUG := true
-ART_BUILD_TARGET_DEBUG := false
-ART_BUILD_HOST_NDEBUG := true
-ART_BUILD_HOST_DEBUG := false
+ART_BUILD_TARGET_NDEBUG ?= true
+ART_BUILD_TARGET_DEBUG ?= false
+ART_BUILD_HOST_NDEBUG ?= true
+ART_BUILD_HOST_DEBUG ?= false
 
 ifeq ($(ART_BUILD_TARGET_NDEBUG),false)
 $(info Disabling ART_BUILD_TARGET_NDEBUG)
@@ -48,12 +42,7 @@ $(info Disabling ART_BUILD_HOST_DEBUG)
 endif
 
 #
-# Enable Optimized Compiler
-#
-ART_USE_OPTIMIZING_COMPILER := true
-
-#
-# Enable JIT
+# Used to enable JIT
 #
 ART_JIT := true
 
@@ -70,14 +59,15 @@ ART_TARGET_CFLAGS :=
 
 # Host.
 ART_HOST_CLANG := false
+
 # Clang on the target. Target builds use GCC by default.
+ifneq ($(USE_CLANG_PLATFORM_BUILD),)
+ART_TARGET_CLANG := $(USE_CLANG_PLATFORM_BUILD)
+else
 ART_TARGET_CLANG := false
+endif
 ART_TARGET_CLANG_arm := false
 ART_TARGET_CLANG_arm64 := false
-ART_TARGET_CLANG_mips := false
-ART_TARGET_CLANG_mips64 := false
-ART_TARGET_CLANG_x86 := false
-ART_TARGET_CLANG_x86_64 := false
 
 define set-target-local-clang-vars
     LOCAL_CLANG := $(ART_TARGET_CLANG)
@@ -87,79 +77,12 @@ define set-target-local-clang-vars
       endif)
 endef
 
-ART_TARGET_CLANG_CFLAGS :=
-ART_TARGET_CLANG_CFLAGS_arm :=
-ART_TARGET_CLANG_CFLAGS_arm64 :=
-ART_TARGET_CLANG_CFLAGS_mips :=
-ART_TARGET_CLANG_CFLAGS_mips64 :=
-ART_TARGET_CLANG_CFLAGS_x86 :=
-ART_TARGET_CLANG_CFLAGS_x86_64 :=
-
-# These are necessary for Clang ARM64 ART builds. TODO: remove.
-ART_TARGET_CLANG_CFLAGS_arm64  += \
-  -DNVALGRIND
-
-# Warn about thread safety violations with clang.
-art_clang_cflags := -Wthread-safety
-
-# Warn if switch fallthroughs aren't annotated.
-art_clang_cflags += -Wimplicit-fallthrough
-
-# Enable float equality warnings.
-art_clang_cflags += -Wfloat-equal
-
-# Enable warning of converting ints to void*.
-art_clang_cflags += -Wint-to-void-pointer-cast
-
-# Enable warning of wrong unused annotations.
-art_clang_cflags += -Wused-but-marked-unused
-
-# Enable warning for deprecated language features.
-art_clang_cflags += -Wdeprecated
-
-# Enable warning for unreachable break & return.
-art_clang_cflags += -Wunreachable-code-break -Wunreachable-code-return
-
-# Enable missing-noreturn only on non-Mac. As lots of things are not implemented for Apple, it's
-# a pain.
-ifneq ($(HOST_OS),darwin)
-  art_clang_cflags += -Wmissing-noreturn
-endif
-
-
 # GCC-only warnings.
 art_gcc_cflags := -Wunused-but-set-parameter
-# Suggest const: too many false positives, but good for a trial run.
-#                  -Wsuggest-attribute=const
-# Useless casts: too many, as we need to be 32/64 agnostic, but the compiler knows.
-#                  -Wuseless-cast
-# Zero-as-null: Have to convert all NULL and "diagnostic ignore" all includes like libnativehelper
-# that are still stuck pre-C++11.
-#                  -Wzero-as-null-pointer-constant \
-# Suggest final: Have to move to a more recent GCC.
-#                  -Wsuggest-final-types
 
-ART_TARGET_CLANG_CFLAGS := $(art_clang_cflags)
-ifeq ($(ART_HOST_CLANG),true)
-  # Bug: 15446488. We don't omit the frame pointer to work around
-  # clang/libunwind bugs that cause SEGVs in run-test-004-ThreadStress.
-  ART_HOST_CFLAGS += $(art_clang_cflags) -fno-omit-frame-pointer
-else
-  ART_HOST_CFLAGS += $(art_gcc_cflags)
-endif
-ifneq ($(ART_TARGET_CLANG),true)
-  ART_TARGET_CFLAGS += $(art_gcc_cflags)
-else
-  # TODO: if we ever want to support GCC/Clang mix for multi-target products, this needs to be
-  #       split up.
-  ifeq ($(ART_TARGET_CLANG_$(TARGET_ARCH)),false)
-    ART_TARGET_CFLAGS += $(art_gcc_cflags)
-  endif
-endif
-
-# Clear local variables now their use has ended.
-art_clang_cflags :=
-art_gcc_cflags :=
+# Undefine local variables now their use has ended.
+undefine art_clang_cflags
+undefine art_gcc_cflags
 
 ART_CPP_EXTENSION := .cc
 
@@ -189,8 +112,7 @@ art_cflags := \
 
 # Missing declarations: too many at the moment, as we use "extern" quite a bit.
 #  -Wmissing-declarations \
-
-
+art_cflags += -DART_USE_OPTIMIZING_COMPILER=1
 
 ifdef ART_IMT_SIZE
   art_cflags += -DIMT_SIZE=$(ART_IMT_SIZE)
@@ -198,8 +120,6 @@ else
   # Default is 64
   art_cflags += -DIMT_SIZE=64
 endif
-
-art_cflags += -DART_USE_OPTIMIZING_COMPILER=1
 
 ifeq ($(ART_HEAP_POISONING),true)
   art_cflags += -DART_HEAP_POISONING=1
@@ -219,27 +139,29 @@ art_non_debug_cflags := \
 
 # Cflags for debug ART and ART tools.
 art_debug_cflags := \
-  -O3
+  $(art_non_debug_cflags)
 
 art_host_non_debug_cflags := $(art_non_debug_cflags)
 art_target_non_debug_cflags := $(art_non_debug_cflags)
 
+ifeq ($(HOST_OS),linux)
+  # Larger frame-size for host clang builds today
+  ifneq ($(ART_COVERAGE),true)
+    ifneq ($(NATIVE_COVERAGE),true)
+      ifndef SANITIZE_HOST
+        art_host_non_debug_cflags +=
+      endif
+      art_target_non_debug_cflags +=
+    endif
+  endif
+endif
 
 ifndef LIBART_IMG_HOST_BASE_ADDRESS
   $(error LIBART_IMG_HOST_BASE_ADDRESS unset)
 endif
+
 ART_HOST_CFLAGS += $(art_cflags) -DART_BASE_ADDRESS=$(LIBART_IMG_HOST_BASE_ADDRESS)
 ART_HOST_CFLAGS += -DART_DEFAULT_INSTRUCTION_SET_FEATURES=default
-
-# Disable -Wpessimizing-move: triggered for art/runtime/base/variant_map.h:261
-# Adding this flag to art_clang_cflags doesn't work because -Wall gets added to
-# ART_HOST_CFLAGS (as a part of art_cflags) after
-# -Wno-pessimizing-move.  Instead, add the flag here to both
-# ART_TARGET_CLANG_CFLAGS and ART_HOST_CFLAGS
-ifeq ($(ART_HOST_CLANG),true)
-ART_HOST_CFLAGS += -Wno-pessimizing-move
-endif
-ART_TARGET_CLANG_CFLAGS += -Wno-pessimizing-move
 
 ifndef LIBART_IMG_TARGET_BASE_ADDRESS
   $(error LIBART_IMG_TARGET_BASE_ADDRESS unset)
@@ -272,27 +194,23 @@ ART_TARGET_CFLAGS += -DART_BASE_ADDRESS_MAX_DELTA=$(LIBART_IMG_TARGET_MAX_BASE_A
 # To use oprofile_android --callgraph, uncomment this and recompile with "mmm art -B -j16"
 # ART_TARGET_CFLAGS += -fno-omit-frame-pointer -marm -mapcs
 
-# Clear locals now they've served their purpose.
-art_cflags :=
-art_debug_cflags :=
-art_non_debug_cflags :=
-art_host_non_debug_cflags :=
-art_target_non_debug_cflags :=
-art_default_gc_type :=
-art_default_gc_type_cflags :=
+# Undefine locals now they've served their purpose.
+undefine art_cflags
+undefine art_debug_cflags
+undefine art_non_debug_cflags
+undefine art_host_non_debug_cflags
+undefine art_target_non_debug_cflags
+undefine art_default_gc_type
+undefine art_default_gc_type_cflags
 
-ART_HOST_LDLIBS :=
-ifneq ($(ART_HOST_CLANG),true)
-  # GCC lacks libc++ assumed atomic operations, grab via libatomic.
-  ART_HOST_LDLIBS += -latomic
-endif
+# GCC lacks libc++ assumed atomic operations, grab via libatomic.
+ART_HOST_LDLIBS += -latomic
 
 ART_TARGET_LDFLAGS :=
 
 # $(1): ndebug_or_debug
 define set-target-local-cflags-vars
   LOCAL_CFLAGS += $(ART_TARGET_CFLAGS)
-  LOCAL_CFLAGS_x86 += $(ART_TARGET_CFLAGS_x86)
   LOCAL_LDFLAGS += $(ART_TARGET_LDFLAGS)
   art_target_cflags_ndebug_or_debug := $(1)
   ifeq ($$(art_target_cflags_ndebug_or_debug),debug)
@@ -301,37 +219,14 @@ define set-target-local-cflags-vars
     LOCAL_CFLAGS += $(ART_TARGET_NON_DEBUG_CFLAGS)
   endif
 
-  LOCAL_CLANG_CFLAGS := $(ART_TARGET_CLANG_CFLAGS)
-  $(foreach arch,$(ART_SUPPORTED_ARCH),
-    LOCAL_CLANG_CFLAGS_$(arch) += $$(ART_TARGET_CLANG_CFLAGS_$(arch)))
-
-  # Clear locally used variables.
-  art_target_cflags_ndebug_or_debug :=
+  # Undefine locally used variables.
+  undefine art_target_cflags_ndebug_or_debug
 endef
 
-# Support for disabling certain builds.
-ART_BUILD_TARGET := false
-ART_BUILD_HOST := false
-ART_BUILD_NDEBUG := false
+# Build host and target as non-debug.
+ART_BUILD_TARGET := true
+ART_BUILD_HOST := true
+ART_BUILD_NDEBUG := true
 ART_BUILD_DEBUG := false
-ifeq ($(ART_BUILD_TARGET_NDEBUG),true)
-  ART_BUILD_TARGET := true
-  ART_BUILD_NDEBUG := true
-endif
-ifeq ($(ART_BUILD_TARGET_DEBUG),true)
-  ART_BUILD_TARGET := true
-  ART_BUILD_DEBUG := false
-  ART_BUILD_NDEBUG := true
-endif
-ifeq ($(ART_BUILD_HOST_NDEBUG),true)
-  ART_BUILD_HOST := true
-  ART_BUILD_NDEBUG := true
-endif
-ifeq ($(ART_BUILD_HOST_DEBUG),true)
-  ART_BUILD_HOST := true
-  ART_BUILD_DEBUG := false
-  ART_BUILD_NDBUG := true
-endif
 
 endif # ART_ANDROID_COMMON_BUILD_MK
-
