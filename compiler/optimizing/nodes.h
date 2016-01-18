@@ -2813,6 +2813,8 @@ class HDivZeroCheck : public HExpression<1> {
     SetRawInputAt(0, value);
   }
 
+  Primitive::Type GetType() const OVERRIDE { return InputAt(0)->GetType(); }
+
   bool CanBeMoved() const OVERRIDE { return true; }
 
   bool InstructionDataEquals(HInstruction* other) const OVERRIDE {
@@ -3222,6 +3224,8 @@ class HInstanceFieldSet : public HTemplateInstruction<2> {
                     bool is_volatile)
       : HTemplateInstruction(SideEffects::ChangesSomething()),
         field_info_(field_offset, field_type, is_volatile, 0) {
+<<<<<<< HEAD
+=======
     SetRawInputAt(0, object);
     SetRawInputAt(1, value);
   }
@@ -3234,10 +3238,26 @@ class HInstanceFieldSet : public HTemplateInstruction<2> {
                     uint32_t field_idx)
       : HTemplateInstruction(SideEffects::ChangesSomething()),
         field_info_(field_offset, field_type, is_volatile, field_idx) {
+>>>>>>> twisted/m6.0
     SetRawInputAt(0, object);
     SetRawInputAt(1, value);
   }
 
+<<<<<<< HEAD
+  HInstanceFieldSet(HInstruction* object,
+                    HInstruction* value,
+                    Primitive::Type field_type,
+                    MemberOffset field_offset,
+                    bool is_volatile,
+                    uint32_t field_idx)
+      : HTemplateInstruction(SideEffects::ChangesSomething()),
+        field_info_(field_offset, field_type, is_volatile, field_idx) {
+    SetRawInputAt(0, object);
+    SetRawInputAt(1, value);
+  }
+
+=======
+>>>>>>> twisted/m6.0
   // TODO: add CanBeNull for accessing a first page field from cannot-be-null object
   bool CanDoImplicitNullCheckOn(HInstruction* obj) const OVERRIDE {
     return (obj == InputAt(0)) && GetFieldOffset().Uint32Value() < kPageSize;

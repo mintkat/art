@@ -279,8 +279,6 @@ static void CreateFloatToFloatPlusTemps(ArenaAllocator* arena, HInvoke* invoke) 
                                                            LocationSummary::kNoCall,
                                                            kIntrinsified);
   locations->SetInAt(0, Location::RequiresFpuRegister());
-  // TODO: Allow x86 to work with memory. This requires assembler support, see below.
-  // locations->SetInAt(0, Location::Any());               // X86 can work on memory directly.
   locations->SetOut(Location::SameAsFirstInput());
   locations->AddTemp(Location::RequiresFpuRegister());  // FP reg to hold mask.
 }
@@ -291,34 +289,18 @@ static void MathAbsFP(LocationSummary* locations,
                       CodeGeneratorX86_64* codegen) {
   Location output = locations->Out();
 
-  if (output.IsFpuRegister()) {
-    // In-register
-    XmmRegister xmm_temp = locations->GetTemp(0).AsFpuRegister<XmmRegister>();
+  DCHECK(output.IsFpuRegister());
+  XmmRegister xmm_temp = locations->GetTemp(0).AsFpuRegister<XmmRegister>();
 
-    // TODO: Can mask directly with constant area using pand if we can guarantee
-    // that the literal is aligned on a 16 byte boundary.  This will avoid a
-    // temporary.
-    if (is64bit) {
-      __ movsd(xmm_temp, codegen->LiteralInt64Address(INT64_C(0x7FFFFFFFFFFFFFFF)));
-      __ andpd(output.AsFpuRegister<XmmRegister>(), xmm_temp);
-    } else {
-      __ movss(xmm_temp, codegen->LiteralInt32Address(INT32_C(0x7FFFFFFF)));
-      __ andps(output.AsFpuRegister<XmmRegister>(), xmm_temp);
-    }
+  // TODO: Can mask directly with constant area using pand if we can guarantee
+  // that the literal is aligned on a 16 byte boundary.  This will avoid a
+  // temporary.
+  if (is64bit) {
+    __ movsd(xmm_temp, codegen->LiteralInt64Address(INT64_C(0x7FFFFFFFFFFFFFFF)));
+    __ andpd(output.AsFpuRegister<XmmRegister>(), xmm_temp);
   } else {
-    // TODO: update when assember support is available.
-    UNIMPLEMENTED(FATAL) << "Needs assembler support.";
-//  Once assembler support is available, in-memory operations look like this:
-//    if (is64bit) {
-//      DCHECK(output.IsDoubleStackSlot());
-//      // No 64b and with literal.
-//      __ movq(cpu_temp, Immediate(INT64_C(0x7FFFFFFFFFFFFFFF)));
-//      __ andq(Address(CpuRegister(RSP), output.GetStackIndex()), cpu_temp);
-//    } else {
-//      DCHECK(output.IsStackSlot());
-//      // Can use and with a literal directly.
-//      __ andl(Address(CpuRegister(RSP), output.GetStackIndex()), Immediate(INT64_C(0x7FFFFFFF)));
-//    }
+    __ movss(xmm_temp, codegen->LiteralInt32Address(INT32_C(0x7FFFFFFF)));
+    __ andps(output.AsFpuRegister<XmmRegister>(), xmm_temp);
   }
 }
 
@@ -1444,6 +1426,14 @@ void IntrinsicLocationsBuilderX86_64::VisitUnsafeCASLong(HInvoke* invoke) {
 }
 
 void IntrinsicLocationsBuilderX86_64::VisitUnsafeCASObject(HInvoke* invoke) {
+  // The UnsafeCASObject intrinsic does not always work when heap
+  // poisoning is enabled (it breaks several libcore tests); turn it
+  // off temporarily as a quick fix.
+  // TODO(rpl): Fix it and turn it back on.
+  if (kPoisonHeapReferences) {
+    return;
+  }
+
   CreateIntIntIntIntIntToInt(arena_, Primitive::kPrimNot, invoke);
 }
 

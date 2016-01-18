@@ -468,7 +468,12 @@ void CodeGeneratorARM::SetupBlockedRegisters(bool is_baseline) const {
     }
 
     blocked_core_registers_[kCoreSavedRegisterForBaseline] = false;
+  }
 
+  if (is_baseline || GetGraph()->IsDebuggable()) {
+    // Stubs do not save callee-save floating point registers. If the graph
+    // is debuggable, we need to deal with these registers differently. For
+    // now, just block them.
     for (size_t i = 0; i < arraysize(kFpuCalleeSaves); ++i) {
       blocked_fpu_registers_[kFpuCalleeSaves[i]] = true;
     }
@@ -2383,6 +2388,9 @@ void InstructionCodeGeneratorARM::VisitDivZeroCheck(HDivZeroCheck* instruction) 
   Location value = locations->InAt(0);
 
   switch (instruction->GetType()) {
+    case Primitive::kPrimByte:
+    case Primitive::kPrimChar:
+    case Primitive::kPrimShort:
     case Primitive::kPrimInt: {
       if (value.IsRegister()) {
         __ cmp(value.AsRegister<Register>(), ShifterOperand(0));

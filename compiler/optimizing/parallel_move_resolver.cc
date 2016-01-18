@@ -38,6 +38,20 @@ void ParallelMoveResolverWithSwap::EmitNativeCode(HParallelMove* parallel_move) 
   // Build up a worklist of moves.
   BuildInitialMoveList(parallel_move);
 
+  // Move stack/stack slot to take advantage of a free register on constrained machines.
+  for (size_t i = 0; i < moves_.Size(); ++i) {
+    const MoveOperands& move = *moves_.Get(i);
+    // Ignore constants and moves already eliminated.
+    if (move.IsEliminated() || move.GetSource().IsConstant()) {
+      continue;
+    }
+
+    if ((move.GetSource().IsStackSlot() || move.GetSource().IsDoubleStackSlot()) &&
+        (move.GetDestination().IsStackSlot() || move.GetDestination().IsDoubleStackSlot())) {
+      PerformMove(i);
+    }
+  }
+
   for (size_t i = 0; i < moves_.Size(); ++i) {
     const MoveOperands& move = *moves_.Get(i);
     // Skip constants to perform them last.  They don't block other moves
@@ -153,7 +167,7 @@ MoveOperands* ParallelMoveResolverWithSwap::PerformMove(size_t index) {
         // If `other_move` was swapped, we iterate again to find a new
         // potential cycle.
         required_swap = nullptr;
-        i = 0;
+        i = -1;
       } else if (required_swap != nullptr) {
         // A move is required to swap. We walk back the cycle to find the
         // move by just returning from this `PerforrmMove`.

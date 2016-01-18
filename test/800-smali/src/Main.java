@@ -53,8 +53,6 @@ public class Main {
                 new Object[]{123}, null, 123));
 
         testCases.add(new TestCase("b/17790197", "B17790197", "getInt", null, null, 100));
-        testCases.add(new TestCase("b/17978759", "B17978759", "test", null, new VerifyError(),
-                null));
         testCases.add(new TestCase("FloatBadArgReg", "FloatBadArgReg", "getInt",
                 new Object[]{100}, null, 100));
         testCases.add(new TestCase("negLong", "negLong", "negLong", null, null, 122142L));
@@ -109,6 +107,11 @@ public class Main {
                 new NullPointerException(), null));
         testCases.add(new TestCase("b/23300986", "B23300986", "runAliasAfterEnter",
                 new Object[] { new Object() }, null, null));
+<<<<<<< HEAD
+=======
+        testCases.add(new TestCase("b/23300986 (2)", "B23300986", "runAliasBeforeEnter",
+                new Object[] { new Object() }, null, null));
+>>>>>>> twisted/m6.0
     }
 
     public void runTests() {

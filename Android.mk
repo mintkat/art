@@ -85,6 +85,7 @@ include $(art_path)/imgdiag/Android.mk
 include $(art_path)/patchoat/Android.mk
 include $(art_path)/dalvikvm/Android.mk
 include $(art_path)/tools/Android.mk
+include $(art_path)/tools/ahat/Android.mk
 include $(art_path)/tools/dexfuzz/Android.mk
 include $(art_path)/tools/dmtracedump/Android.mk
 include $(art_path)/sigchainlib/Android.mk
@@ -129,7 +130,10 @@ else
 test-art-target-sync: $(TEST_ART_TARGET_SYNC_DEPS)
 	adb root
 	adb wait-for-device push $(ANDROID_PRODUCT_OUT)/system $(ART_TEST_ANDROID_ROOT)
-	adb push $(ANDROID_PRODUCT_OUT)/data /data
+# Push the contents of the `data` dir into `/data` on the device.  If
+# `/data` already exists on the device, it is not overwritten, but its
+# contents are updated.
+	adb push $(ANDROID_PRODUCT_OUT)/data /
 endif
 
 # Undefine variable now its served its purpose.

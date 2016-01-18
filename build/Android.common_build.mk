@@ -29,10 +29,17 @@ include art/build/Android.common_utils.mk
 #
 # Beware that tests may use the non-debug build for performance, notable 055-enum-performance
 #
+<<<<<<< HEAD
 ART_BUILD_TARGET_NDEBUG ?= true
 ART_BUILD_TARGET_DEBUG ?= false
 ART_BUILD_HOST_NDEBUG ?= true
 ART_BUILD_HOST_DEBUG ?= false
+=======
+ART_BUILD_TARGET_NDEBUG := true
+ART_BUILD_TARGET_DEBUG := false
+ART_BUILD_HOST_NDEBUG := true
+ART_BUILD_HOST_DEBUG := false
+>>>>>>> twisted/m6.0
 
 ifeq ($(ART_BUILD_TARGET_NDEBUG),false)
 $(info Disabling ART_BUILD_TARGET_NDEBUG)
@@ -48,6 +55,7 @@ $(info Disabling ART_BUILD_HOST_DEBUG)
 endif
 
 #
+<<<<<<< HEAD
 # Enable JIT
 #
 ART_JIT := true
@@ -56,6 +64,16 @@ ART_JIT := true
 # Enable Optimized Compiler
 #
 ART_USE_OPTIMIZING_COMPILER := true
+=======
+# Enable Optimized Compiler
+#
+ART_USE_OPTIMIZING_COMPILER := true
+
+#
+# Enable JIT
+#
+ART_JIT := true
+>>>>>>> twisted/m6.0
 
 #
 # Used to change the default GC. Valid values are CMS, SS, GSS. The default is CMS.
@@ -70,7 +88,10 @@ ART_TARGET_CFLAGS :=
 
 # Host.
 ART_HOST_CLANG := false
+<<<<<<< HEAD
 
+=======
+>>>>>>> twisted/m6.0
 # Clang on the target. Target builds use GCC by default.
 ART_TARGET_CLANG := false
 ART_TARGET_CLANG_arm := false
@@ -201,9 +222,7 @@ else
   art_cflags += -DIMT_SIZE=64
 endif
 
-ifeq ($(ART_USE_OPTIMIZING_COMPILER),true)
-  art_cflags += -DART_USE_OPTIMIZING_COMPILER=1
-endif
+art_cflags += -DART_USE_OPTIMIZING_COMPILER=1
 
 ifeq ($(ART_HEAP_POISONING),true)
   art_cflags += -DART_HEAP_POISONING=1
@@ -221,9 +240,15 @@ endif
 art_non_debug_cflags := \
   -O3
 
+<<<<<<< HEAD
 # Force non-debug cflags for ART and ART tools.
 art_debug_cflags := $(art_non_debug_cflags)
 
+=======
+# Cflags for debug ART and ART tools.
+art_debug_cflags := \
+  -O3
+>>>>>>> twisted/m6.0
 
 art_host_non_debug_cflags := $(art_non_debug_cflags)
 art_target_non_debug_cflags := $(art_non_debug_cflags)
@@ -234,6 +259,16 @@ ifndef LIBART_IMG_HOST_BASE_ADDRESS
 endif
 ART_HOST_CFLAGS += $(art_cflags) -DART_BASE_ADDRESS=$(LIBART_IMG_HOST_BASE_ADDRESS)
 ART_HOST_CFLAGS += -DART_DEFAULT_INSTRUCTION_SET_FEATURES=default
+
+# Disable -Wpessimizing-move: triggered for art/runtime/base/variant_map.h:261
+# Adding this flag to art_clang_cflags doesn't work because -Wall gets added to
+# ART_HOST_CFLAGS (as a part of art_cflags) after
+# -Wno-pessimizing-move.  Instead, add the flag here to both
+# ART_TARGET_CLANG_CFLAGS and ART_HOST_CFLAGS
+ifeq ($(ART_HOST_CLANG),true)
+ART_HOST_CFLAGS += -Wno-pessimizing-move
+endif
+ART_TARGET_CLANG_CFLAGS += -Wno-pessimizing-move
 
 ifndef LIBART_IMG_TARGET_BASE_ADDRESS
   $(error LIBART_IMG_TARGET_BASE_ADDRESS unset)

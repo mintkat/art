@@ -641,7 +641,12 @@ void CodeGeneratorARM64::SetupBlockedRegisters(bool is_baseline) const {
     while (!reserved_core_baseline_registers.IsEmpty()) {
       blocked_core_registers_[reserved_core_baseline_registers.PopLowestIndex().code()] = true;
     }
+  }
 
+  if (is_baseline || GetGraph()->IsDebuggable()) {
+    // Stubs do not save callee-save floating point registers. If the graph
+    // is debuggable, we need to deal with these registers differently. For
+    // now, just block them.
     CPURegList reserved_fp_baseline_registers = callee_saved_fp_registers;
     while (!reserved_fp_baseline_registers.IsEmpty()) {
       blocked_fpu_registers_[reserved_fp_baseline_registers.PopLowestIndex().code()] = true;
@@ -1662,8 +1667,8 @@ void InstructionCodeGeneratorARM64::VisitDivZeroCheck(HDivZeroCheck* instruction
 
   Primitive::Type type = instruction->GetType();
 
-  if ((type != Primitive::kPrimInt) && (type != Primitive::kPrimLong)) {
-      LOG(FATAL) << "Unexpected type " << type << "for DivZeroCheck.";
+  if ((type == Primitive::kPrimBoolean) || !Primitive::IsIntegralType(type)) {
+      LOG(FATAL) << "Unexpected type " << type << " for DivZeroCheck.";
     return;
   }
 

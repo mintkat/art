@@ -74,6 +74,8 @@
 
 namespace art {
 
+extern thread_local bool check_bail_out;
+
 static constexpr bool kTimeCompileMethod = !kIsDebugBuild;
 
 // Whether to produce 64-bit ELF files for 64-bit targets.
@@ -502,8 +504,18 @@ void CompilerDriver::CompileAll(jobject class_loader,
   std::unique_ptr<ThreadPool> thread_pool(
       new ThreadPool("Compiler driver thread pool", thread_count_ - 1));
   VLOG(compiler) << "Before precompile " << GetMemoryUsageString(false);
+  // Precompile:
+  // 1) Load image classes
+  // 2) Resolve all classes
+  // 3) Attempt to verify all classes
+  // 4) Attempt to initialize image classes, and trivially initialized classes
   PreCompile(class_loader, dex_files, thread_pool.get(), timings);
-  Compile(class_loader, dex_files, thread_pool.get(), timings);
+  // Compile:
+  // 1) Compile all classes and methods enabled for compilation. May fall back to dex-to-dex
+  //    compilation.
+  if (!GetCompilerOptions().VerifyAtRuntime()) {
+    Compile(class_loader, dex_files, thread_pool.get(), timings);
+  }
   if (dump_stats_) {
     stats_->Dump();
   }
@@ -2292,6 +2304,7 @@ void CompilerDriver::CompileMethod(Thread* self, const DexFile::CodeItem* code_i
                    IsMethodToCompile(method_ref);
     if (compile) {
       // NOTE: if compiler declines to compile this method, it will return null.
+      check_bail_out = false;
       compiled_method = compiler_->Compile(code_item, access_flags, invoke_type, class_def_idx,
                                            method_idx, class_loader, dex_file);
     }

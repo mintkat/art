@@ -126,7 +126,7 @@ class StubTest : public CommonRuntimeTest {
           // Use the result from r0
         : [arg0] "r"(arg0), [arg1] "r"(arg1), [arg2] "r"(arg2), [code] "r"(code), [self] "r"(self),
           [referrer] "r"(referrer)
-        : "memory");  // clobber.
+        : "r0", "memory");  // clobber.
 #elif defined(__aarch64__)
     __asm__ __volatile__(
         // Spill x0-x7 which we say we don't clobber. May contain args.
@@ -326,9 +326,9 @@ class StubTest : public CommonRuntimeTest {
           [referrer] "r"(referrer)
         : "at", "v0", "v1", "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "t8", "t9", "k0", "k1",
           "fp", "ra",
-          "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13",
-          "f14", "f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25", "f26",
-          "f27", "f28", "f29", "f30", "f31",
+          "$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7", "$f8", "$f9", "$f10", "$f11",
+          "$f12", "$f13", "$f14", "$f15", "$f16", "$f17", "$f18", "$f19", "$f20", "$f21", "$f22",
+          "$f23", "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31",
           "memory");  // clobber.
 #elif defined(__mips__) && defined(__LP64__)
     __asm__ __volatile__ (
@@ -479,7 +479,7 @@ class StubTest : public CommonRuntimeTest {
           // Use the result from r0
         : [arg0] "r"(arg0), [arg1] "r"(arg1), [arg2] "r"(arg2), [code] "r"(code), [self] "r"(self),
           [referrer] "r"(referrer), [hidden] "r"(hidden)
-        : "memory");  // clobber.
+        : "r0", "memory");  // clobber.
 #elif defined(__aarch64__)
     __asm__ __volatile__(
         // Spill x0-x7 which we say we don't clobber. May contain args.
@@ -680,9 +680,9 @@ class StubTest : public CommonRuntimeTest {
           [referrer] "r"(referrer), [hidden] "r"(hidden)
         : "at", "v0", "v1", "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "t8", "t9", "k0", "k1",
           "fp", "ra",
-          "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13",
-          "f14", "f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25", "f26",
-          "f27", "f28", "f29", "f30", "f31",
+          "$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7", "$f8", "$f9", "$f10", "$f11",
+          "$f12", "$f13", "$f14", "$f15", "$f16", "$f17", "$f18", "$f19", "$f20", "$f21", "$f22",
+          "$f23", "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31",
           "memory");  // clobber.
 #elif defined(__mips__) && defined(__LP64__)
     __asm__ __volatile__ (
