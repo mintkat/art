@@ -107,11 +107,8 @@ public class Main {
                 new NullPointerException(), null));
         testCases.add(new TestCase("b/23300986", "B23300986", "runAliasAfterEnter",
                 new Object[] { new Object() }, null, null));
-<<<<<<< HEAD
-=======
         testCases.add(new TestCase("b/23300986 (2)", "B23300986", "runAliasBeforeEnter",
                 new Object[] { new Object() }, null, null));
->>>>>>> twisted/m6.0
     }
 
     public void runTests() {
@@ -198,3 +195,4 @@ public class Main {
         System.out.println("Done!");
     }
 }
+

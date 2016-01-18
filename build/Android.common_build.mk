@@ -29,17 +29,10 @@ include art/build/Android.common_utils.mk
 #
 # Beware that tests may use the non-debug build for performance, notable 055-enum-performance
 #
-<<<<<<< HEAD
-ART_BUILD_TARGET_NDEBUG ?= true
-ART_BUILD_TARGET_DEBUG ?= false
-ART_BUILD_HOST_NDEBUG ?= true
-ART_BUILD_HOST_DEBUG ?= false
-=======
 ART_BUILD_TARGET_NDEBUG := true
 ART_BUILD_TARGET_DEBUG := false
 ART_BUILD_HOST_NDEBUG := true
 ART_BUILD_HOST_DEBUG := false
->>>>>>> twisted/m6.0
 
 ifeq ($(ART_BUILD_TARGET_NDEBUG),false)
 $(info Disabling ART_BUILD_TARGET_NDEBUG)
@@ -55,16 +48,6 @@ $(info Disabling ART_BUILD_HOST_DEBUG)
 endif
 
 #
-<<<<<<< HEAD
-# Enable JIT
-#
-ART_JIT := true
-
-#
-# Enable Optimized Compiler
-#
-ART_USE_OPTIMIZING_COMPILER := true
-=======
 # Enable Optimized Compiler
 #
 ART_USE_OPTIMIZING_COMPILER := true
@@ -73,7 +56,6 @@ ART_USE_OPTIMIZING_COMPILER := true
 # Enable JIT
 #
 ART_JIT := true
->>>>>>> twisted/m6.0
 
 #
 # Used to change the default GC. Valid values are CMS, SS, GSS. The default is CMS.
@@ -88,10 +70,6 @@ ART_TARGET_CFLAGS :=
 
 # Host.
 ART_HOST_CLANG := false
-<<<<<<< HEAD
-
-=======
->>>>>>> twisted/m6.0
 # Clang on the target. Target builds use GCC by default.
 ART_TARGET_CLANG := false
 ART_TARGET_CLANG_arm := false
@@ -240,15 +218,9 @@ endif
 art_non_debug_cflags := \
   -O3
 
-<<<<<<< HEAD
-# Force non-debug cflags for ART and ART tools.
-art_debug_cflags := $(art_non_debug_cflags)
-
-=======
 # Cflags for debug ART and ART tools.
 art_debug_cflags := \
   -O3
->>>>>>> twisted/m6.0
 
 art_host_non_debug_cflags := $(art_non_debug_cflags)
 art_target_non_debug_cflags := $(art_non_debug_cflags)
@@ -349,8 +321,7 @@ ifeq ($(ART_BUILD_TARGET_NDEBUG),true)
 endif
 ifeq ($(ART_BUILD_TARGET_DEBUG),true)
   ART_BUILD_TARGET := true
-  ART_BUILD_DEBUG := false
-  ART_BUILD_NDEBUG := true
+  ART_BUILD_DEBUG := true
 endif
 ifeq ($(ART_BUILD_HOST_NDEBUG),true)
   ART_BUILD_HOST := true
@@ -358,8 +329,8 @@ ifeq ($(ART_BUILD_HOST_NDEBUG),true)
 endif
 ifeq ($(ART_BUILD_HOST_DEBUG),true)
   ART_BUILD_HOST := true
-  ART_BUILD_DEBUG := false
-  ART_BUILD_NDBUG := true
+  ART_BUILD_DEBUG := true
 endif
 
 endif # ART_ANDROID_COMMON_BUILD_MK
+
