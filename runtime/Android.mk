@@ -474,7 +474,7 @@ $$(ENUM_OPERATOR_OUT_GEN): $$(GENERATED_SRC_DIR)/%_operator_out.cc : $(LOCAL_PAT
     # For android::FileMap used by libziparchive.
     LOCAL_SHARED_LIBRARIES += libutils
     # For liblog, atrace, properties, ashmem, set_sched_policy and socket_peer_is_trusted.
-    LOCAL_SHARED_LIBRARIES += libcutils
+    LOCAL_SHARED_LIBRARIES += liblog libcutils
     ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
       LOCAL_WHOLE_STATIC_LIBRARIES += libqc-art
     endif
