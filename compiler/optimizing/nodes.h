@@ -20,6 +20,7 @@
 #include "base/arena_containers.h"
 #include "base/arena_object.h"
 #include "dex/compiler_enums.h"
+#include "dex_instruction-inl.h"
 #include "entrypoints/quick/quick_entrypoints_enum.h"
 #include "handle.h"
 #include "handle_scope.h"
