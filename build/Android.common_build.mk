@@ -99,14 +99,8 @@ art_cflags := \
   -fno-rtti \
   -std=gnu++11 \
   -ggdb3 \
-  -Wall \
-  -Wextra \
   -Wstrict-aliasing \
   -fstrict-aliasing \
-  -Wunreachable-code \
-  -Wredundant-decls \
-  -Wshadow \
-  -Wunused \
   -fvisibility=protected \
   $(art_default_gc_type_cflags)
 
